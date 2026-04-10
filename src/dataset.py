@@ -33,12 +33,17 @@ def get_loader(
         max_cnt is None or len(dataset) == max_cnt
     ), f"Dataset size is {len(dataset)}/{max_cnt}"
 
+    rank = dist.get_rank() if dist.is_available() and dist.is_initialized() else 0
+    world_size = (
+        dist.get_world_size() if dist.is_available() and dist.is_initialized() else 1
+    )
+
     sampler_class = InfiniteSampler if is_train else DistributedSampler
     dataset_sampler = sampler_class(
         dataset=dataset,
-        rank=dist.get_rank(),
+        rank=rank,
         shuffle=is_train,
-        num_replicas=dist.get_world_size(),
+        num_replicas=world_size,
     )
     data = torch.utils.data.DataLoader(
         dataset=dataset, sampler=dataset_sampler, batch_size=batch_size

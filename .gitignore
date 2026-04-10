@@ -107,6 +107,8 @@ wandb/
 .cometml-runs/
 outputs/
 results/
+data/
+train_log.txt
 
 # editor, os cache directory
 .vscode/

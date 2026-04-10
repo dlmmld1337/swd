@@ -23,7 +23,7 @@ from transformers import (
 )
 
 SD35_MODEL_NAMES = {
-    "medium": "stabilityai/stable-diffusion-3.5-medium",
+    "medium": "adamo1139/stable-diffusion-3.5-medium-ungated",
     "large": "stabilityai/stable-diffusion-3.5-large",
 }
 

@@ -11,7 +11,10 @@ from src.losses import fake_diffusion_loss, generator_loss
 from src.evaluation.eval import distributed_sampling, log_validation
 from src.evaluation.metrics import calculate_scores
 from src.flow_matching_sampler import FlowMatchingSolver
-from src.transformer_with_discriminator import TransformerCls, forward_with_feature_extraction
+from src.transformer_with_discriminator import (
+    TransformerCls,
+    forward_with_feature_extraction,
+)
 from src.utils.prepare_utils import (
     prepare_accelerator,
     prepare_models,
@@ -82,7 +85,9 @@ def train(args):
     )
 
     ## Add GAN head
-    transformer_fake.forward = types.MethodType(forward_with_feature_extraction, transformer_fake)
+    transformer_fake.forward = types.MethodType(
+        forward_with_feature_extraction, transformer_fake
+    )
 
     transformer_fake = TransformerCls(args, transformer_fake)
     initial_global_step = load_if_exist(args, accelerator, transformer, is_student=True)
@@ -288,12 +293,22 @@ def train(args):
                 )
                 if accelerator.is_main_process:
                     torch.cuda.empty_cache()
+                    # Offload text encoders to CPU to free VRAM for eval models
+                    text_encoder.to("cpu")
+                    text_encoder_2.to("cpu")
+                    text_encoder_3.to("cpu")
+                    torch.cuda.empty_cache()
                     pick_score, clip_score, fid_score = calculate_scores(
                         args,
                         images,
                         prompts,
                         ref_stats_path=fid_stats_path,
                     )
+                    # Move text encoders back to GPU
+                    text_encoder.to(accelerator.device)
+                    text_encoder_2.to(accelerator.device)
+                    text_encoder_3.to(accelerator.device)
+                    torch.cuda.empty_cache()
                     logs = {
                         f"fid_{eval_set_name}": fid_score.item(),
                         f"pick_score_{eval_set_name}": pick_score.item(),
@@ -350,9 +365,9 @@ def train(args):
         ### ----------------------------------------------------
         if accelerator.is_main_process and global_step % args.log_steps == 0:
             logs = {
-                "fake_loss": avg_dmd_fake_loss.detach().item()
-                if args.do_dmd_loss
-                else 0,
+                "fake_loss": (
+                    avg_dmd_fake_loss.detach().item() if args.do_dmd_loss else 0
+                ),
                 "dmd_loss": avg_dmd_loss.detach().item() if args.do_dmd_loss else 0,
                 "mmd_loss": avg_mmd_loss.detach().item() if args.do_mmd_loss else 0,
             }

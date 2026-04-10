@@ -48,6 +48,11 @@ class TransformerCls(nn.Module):
         self.cls_pred_branch = nn.Sequential(*self.list_of_layers)
 
         self.cls_pred_branch.requires_grad_(True)
+
+    @property
+    def module(self):
+        # In DDP, .module unwraps the model. In single-GPU mode, return self.
+        return self
         num_cls_params = sum(p.numel() for p in self.cls_pred_branch.parameters())
         logger.info(f"Classification head number of trainable params: {num_cls_params}")
 

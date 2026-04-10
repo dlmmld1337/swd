@@ -64,7 +64,7 @@ def load_if_exist(args, accelerator, transformer, is_student):
                     adapter_name="resume",
                     is_trainable=True,
                 )
-                transformer.set_adapter("resume")
+                transformer.teacher_transformer.set_adapter("resume")
                 transformer.cls_pred_branch.load_state_dict(
                     torch.load(os.path.join(path, "fake", "cls_head.pt"))
                 )

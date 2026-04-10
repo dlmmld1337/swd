@@ -237,15 +237,18 @@ def prepare_val_prompts(path, bs=20, max_cnt=5000):
     all_text = list(df["caption"])
     all_text = all_text[:max_cnt]
 
-    num_batches = (
-        (len(all_text) - 1) // (bs * dist.get_world_size()) + 1
-    ) * dist.get_world_size()
+    world_size = (
+        dist.get_world_size() if dist.is_available() and dist.is_initialized() else 1
+    )
+    rank = dist.get_rank() if dist.is_available() and dist.is_initialized() else 0
+
+    num_batches = ((len(all_text) - 1) // (bs * world_size) + 1) * world_size
     all_batches = np.array_split(np.array(all_text), num_batches)
-    rank_batches = all_batches[dist.get_rank() :: dist.get_world_size()]
+    rank_batches = all_batches[rank::world_size]
 
     index_list = np.arange(len(all_text))
     all_batches_index = np.array_split(index_list, num_batches)
-    rank_batches_index = all_batches_index[dist.get_rank() :: dist.get_world_size()]
+    rank_batches_index = all_batches_index[rank::world_size]
     return rank_batches, rank_batches_index, all_text
 
 
