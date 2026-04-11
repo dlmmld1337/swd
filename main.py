@@ -13,10 +13,10 @@ def parse_args(input_args=None):
     parser.add_argument(
         "--model_name",
         type=str,
-        choices=["medium", "large"],
+        choices=["medium", "large", "klein"],
         default="medium",
         required=True,
-        help="SD3.5 model size",
+        help="Model variant: SD3.5 medium/large or FLUX.2 Klein img2img.",
     )
     parser.add_argument(
         "--revision",
@@ -377,6 +377,26 @@ def parse_args(input_args=None):
         help="For distributed training: local_rank",
     )
 
+    # Klein-specific
+    parser.add_argument(
+        "--structural_noise_radius",
+        type=float,
+        default=100.0,
+        help="Frequency cutoff radius for structured noise in Klein img2img training.",
+    )
+    parser.add_argument(
+        "--max_sequence_length",
+        type=int,
+        default=512,
+        help="Maximum token sequence length for the Klein text encoder.",
+    )
+    parser.add_argument(
+        "--resolution",
+        type=int,
+        default=512,
+        help="Training image resolution (pixels).",
+    )
+
     if input_args is not None:
         args = parser.parse_args(input_args)
     else:
@@ -396,4 +416,9 @@ def parse_args(input_args=None):
 
 if __name__ == "__main__":
     args = parse_args()
-    train(args)
+    if args.model_name == "klein":
+        from train_klein import train as train_klein
+
+        train_klein(args)
+    else:
+        train(args)
