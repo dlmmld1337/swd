@@ -103,7 +103,7 @@ def log_validation_klein(
             solver=fm_solver,
             structural_noise_radius=getattr(args, "structural_noise_radius", 100),
             generate_structured_noise_fn=generate_structured_noise_batch_vectorized,
-            guidance_scale=1.0,
+            guidance_scale=args.cfg_teacher,
             weight_dtype=weight_dtype,
         )
 
@@ -386,7 +386,9 @@ def train(args):
 
         ### Validation images
         ### ----------------------------------------------------
-        if accelerator.is_main_process and global_step % args.validation_steps == 0:
+        if accelerator.is_main_process and (
+            global_step == 1 or global_step % args.validation_steps == 0
+        ):
             log_validation_klein(
                 transformer_student=transformer,
                 vae=vae,

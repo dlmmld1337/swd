@@ -5,8 +5,8 @@ source /code/auto_remaster/sandbox/DiffSynth-Studio/.venv_diff/bin/activate
 cd "$(dirname "$0")"
 ARGS=(
     --model_name "klein"
-    --train_batch_size 1
-    --gradient_accumulation_steps 8
+    --train_batch_size 2
+    --gradient_accumulation_steps 1
     --learning_rate 5e-6
     --learning_rate_cls 5e-6
     --num_boundaries 4
@@ -16,11 +16,12 @@ ARGS=(
     --do_dmd_loss
     --do_gan_loss
     --do_mmd_loss
-    --cfg_teacher 3.5
-    --cls_blocks 8
-    --mmd_blocks 8
+    --cfg_teacher 1.0
+    --cls_blocks 16
+    --mmd_blocks 16
     --num_discriminator_layers 4
     --apply_lora_to_attn_projections
+    --apply_lora_to_mlp_projections
     --lora_rank 64
     --seed 42
     --gradient_checkpointing

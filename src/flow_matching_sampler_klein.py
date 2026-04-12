@@ -87,6 +87,7 @@ def sampling_klein_img2img(
 
         # Pack and call the student
         hidden_states, img_ids, latent_ids, _ = pack_klein_input(latent, cond_latent)
+        guidance = torch.full([1], guidance_scale, device=device, dtype=dtype)
         with torch.autocast(device_type=device.type, dtype=dtype):
             out = model(
                 hidden_states=hidden_states.to(dtype),
@@ -94,7 +95,7 @@ def sampling_klein_img2img(
                 timestep=T / 1000,
                 img_ids=img_ids,
                 txt_ids=text_ids,
-                guidance=None,
+                guidance=guidance,
                 return_dict=False,
             )
         pred_tokens = out[0]  # (1, 2*noisy_len, C) — has noisy+cond tokens
