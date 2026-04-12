@@ -5,8 +5,8 @@ source /code/auto_remaster/sandbox/DiffSynth-Studio/.venv_diff/bin/activate
 cd "$(dirname "$0")"
 ARGS=(
     --model_name "klein"
-    --train_batch_size 2
-    --gradient_accumulation_steps 1
+    --train_batch_size 1
+    --gradient_accumulation_steps 8
     --learning_rate 5e-6
     --learning_rate_cls 5e-6
     --num_boundaries 4
@@ -33,7 +33,7 @@ ARGS=(
 
     # real values:
     --validation_steps 250
-    --evaluation_steps 3000
+    --evaluation_steps 1000
     --max_train_steps 3000
 
     # debug values: 3 validation/save events at steps 1, 2, 3
